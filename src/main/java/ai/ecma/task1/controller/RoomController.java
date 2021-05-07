@@ -1,5 +1,6 @@
 package ai.ecma.task1.controller;
 
+import ai.ecma.task1.model.Hotel;
 import ai.ecma.task1.model.Room;
 import ai.ecma.task1.repository.HotelRepository;
 import ai.ecma.task1.repository.RoomRepository;
@@ -8,6 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/Room")
@@ -52,7 +55,7 @@ public class RoomController {
         return addOne(newRoom, room);
     }
 
-    @DeleteMapping("/del/{id}")
+    @DeleteMapping("/del/{roomId}")
     public String deleteRoom(@PathVariable Integer roomId){
         if (!roomRepository.findById(roomId).isPresent()) {
             return "room not found";
@@ -64,6 +67,10 @@ public class RoomController {
 
     //Helper method
     private String addOne(Room newRoom, Room room) {
+        Optional<Hotel> byId = hotelRepository.findById(room.getHotel().getId());
+        if (!byId.isPresent()) {
+            return "bunday mexmonxona yo'q";
+        }
         room.setFloor(newRoom.getFloor());
         room.setNumber(newRoom.getNumber());
         room.setSize(newRoom.getSize());

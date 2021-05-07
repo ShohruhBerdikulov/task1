@@ -7,25 +7,29 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/Hotel")
 public class HotelController {
     @Autowired
     HotelRepository hotelRepository;
 
-    @GetMapping("/{id}")
-    public Object hotelOnePageable(@PathVariable Integer id, @RequestParam int page) {
-        if (!hotelRepository.findById(id).isPresent()) {
-            return "bunday id mavjud emas";
-        }
-        return hotelRepository.findById(id);
+    @GetMapping
+    public List<Hotel> getHotels(){
+        return hotelRepository.findAll();
     }
 
-    @GetMapping("/all")
-    public Object hotelAllPageable(@RequestParam int page) {
-        Pageable pageable = PageRequest.of(page, 10);
-        return hotelRepository.findAll(pageable);
+    @GetMapping("/{id}")
+    public Hotel hotelOnePageable(@PathVariable Integer id) {
+        if (!hotelRepository.findById(id).isPresent()) {
+            return null;
+        }
+        Optional<Hotel> byId = hotelRepository.findById(id);
+        return  byId.get();
     }
+
 
     @PostMapping("/add")
     public String addHotel(@RequestBody Hotel newHotel) {
@@ -38,22 +42,28 @@ public class HotelController {
         return "success";
     }
 
-    @PutMapping("/add/{hotelId}")
+    @PutMapping("/edit/{hotelId}")
     public String setHotel(@PathVariable Integer hotelId, @RequestBody Hotel newHotel) {
-        if (hotelRepository.findById(hotelId).isPresent()) {
-            hotelRepository.save(newHotel);
+        Optional<Hotel> byId = hotelRepository.findById(hotelId);
+        if (byId.isPresent()) {
+            if (hotelRepository.existsByName(newHotel.getName())){
+                return "Already exist";
+            }
+            Hotel hotel = byId.get();
+            hotel.setName(newHotel.getName());
+            hotelRepository.save(hotel);
+            return "Hotel edited successfully";
         }
-        return "Hotel not found";
+        return "not found this id";
 
     }
 
     @DeleteMapping("/del/{id}")
-    public String deleteHotel(@PathVariable Integer hotelId) {
-        if (!hotelRepository.findById(hotelId).isPresent()) {
-            return "room not found";
+    public String deleteHotel(@PathVariable Integer id) {
+        if (hotelRepository.findById(id).isPresent()){
+            hotelRepository.deleteById(id);
+            return "successfully deleted";
         }
-        hotelRepository.deleteById(hotelId);
-        return "successfully deleted";
+        return "hotel not found";
     }
-
 }
