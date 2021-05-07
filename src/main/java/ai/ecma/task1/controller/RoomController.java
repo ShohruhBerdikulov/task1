@@ -42,6 +42,11 @@ public class RoomController {
         if (!hotelRepository.findById(newRoom.getHotel().getId()).isPresent()) {
             return "hotel no found";
         }
+        for (Room room : roomRepository.findAll()) {
+            if (room.equals(newRoom)) {
+                return "bunday xona oldin qo'shilgan";
+            }
+        }
         Room room=new Room();
         return addOne(newRoom, room);
     }
