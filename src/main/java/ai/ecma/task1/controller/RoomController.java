@@ -69,21 +69,22 @@ public class RoomController {
             return "room not found";
         }
         Room roomOld = byId.get();
+        Integer number = roomOld.getNumber();
+        Integer id = roomOld.getHotel().getId();
         if (newRoom.getNumber() != null) roomOld.setNumber(newRoom.getNumber());
         if (newRoom.getFloor() != null) roomOld.setFloor(newRoom.getFloor());
         if (newRoom.getSize() != null) roomOld.setSize(newRoom.getSize());
         if (newRoom.getHotel().getId() != null) roomOld.getHotel().setId(newRoom.getHotel().getId());
 
-        int count = 0;
-        for (Room room : roomRepository.findAll()) {
-            if (roomOld.getHotel().getId().equals(room.getHotel().getId())
-                    &&
-                    newRoom.getNumber().equals(room.getNumber()))
-                count++; //nechta shunday room borligi aniqlanadi 1 ta bo'lishi kk
+        if (!(id.equals(roomOld.getHotel().getId())
+                && number.equals(roomOld.getNumber()))) {  //number bn hotelid ga ozgartirish kiritilmagani tekshirildi
+            for (Room room : roomRepository.findAllByHotelId(roomOld.getHotel().getId())) {
+                if (room.getNumber().equals(roomOld.getNumber())) {
+                    return "bunday xona mavjud";
+                }
+            }
         }
-        if (count == 1) {
-            roomRepository.save(roomOld);
-            return "success";
-        } else return "Error";
+        roomRepository.save(roomOld);
+        return "success";
     }
 }
